@@ -56,8 +56,7 @@ class MainActivity : AppCompatActivity() {
             this,
             PlayerConfig(
                 playbackConfig = PlaybackConfig(isAutoplayEnabled = true)
-            ),
-            AnalyticsConfig(analyticsKey)
+            )
         )
 
         playerView = PlayerView(
@@ -83,11 +82,6 @@ class MainActivity : AppCompatActivity() {
         val sourceURL = "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd"
 
         player.load(SourceConfig(sourceURL, SourceType.Dash))
-
-        // change video quality when source loaded
-        player.on<SourceEvent.Loaded>{
-            changeVideoQuality()
-        }
     }
 
     override fun onResume() {
@@ -170,7 +164,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun addEventListener() {
         player.on<PlayerEvent.Error>(::onErrorEvent)
-        player.on<SourceEvent.Error>(::onErrorEvent)
         player.on(::onSeeked)
     }
 
@@ -197,21 +190,6 @@ class MainActivity : AppCompatActivity() {
         val seekTarget = (pendingSeekTarget ?: currentTime) - SEEKING_OFFSET
         pendingSeekTarget = seekTarget
         seek(seekTarget)
-    }
-
-    /*
-     * This function iterates through all available video qualities
-     * and sets the player source with the new quality after a 7-second delay.
-     */
-    private fun changeVideoQuality(){
-        CoroutineScope(Dispatchers.Main).launch {
-            player.source?.availableVideoQualities?.forEach {
-                delay(7000)
-                Toast.makeText(this@MainActivity, "set video quality = ${it.height}x${it.width}\"", Toast.LENGTH_SHORT).show()
-                player.source?.setVideoQuality(it.id)
-            }
-            changeVideoQuality()
-        }
     }
 }
 
